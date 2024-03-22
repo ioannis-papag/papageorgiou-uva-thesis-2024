@@ -1,0 +1,25 @@
+import object_encoder as oe
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import torch
+
+model = oe.ObjectEncoder()
+
+input_array = np.load("C:\\Users\\johnp\\Desktop\\thesis\\code\\dataset_blocks_full\\train\\masks\\mask_1.npy")
+
+
+input_array = input_array.astype(np.float32)
+
+
+input_tensor = torch.tensor(input_array)
+
+
+if input_tensor.dim() == 3:
+    input_tensor = input_tensor.unsqueeze(0) 
+
+
+output = model(input_tensor)
+
+
+print(output)
