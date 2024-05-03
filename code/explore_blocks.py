@@ -11,11 +11,14 @@ import numpy as np
 import matplotlib.patches as patches
 import gc 
 import matplotlib
+from matplotlib.animation import FuncAnimation
+import matplotlib.pyplot as plt
+import random
+ 
 
-matplotlib.use('Agg')
 
 TABLE_COLOR    = [128, 51,  0,   255]
-ROBOT_COLOR    = [102, 102, 10,  255]
+ROBOT_COLOR    = [102, 102, 102,  255]
 
 RED_COLOR      = [230, 26,  26,  255] #block a
 TURQOISE_COLOR = [112, 227, 246, 255] #block b
@@ -150,18 +153,20 @@ def plot_feature_map(feature_map, original_img, title="Feature Map"):
     plt.show()
 
 
-
-env = pddlgym.make("PDDLEnvBlocks-v0", seed=1)
+matplotlib.use('Agg')
+n_of_resets = 0
+env = pddlgym.make("PDDLEnvBlocks-v0", seed=1, dynamic_action_space=True)
 obs, debug_info = env.reset()
+
 img = env.render()
-env.action_space.seed(1)
+env.action_space.seed(0)
 feature_maps = create_feature_maps(img, ALL_COLORS)
 
-output_dir = f'dataset_blocks/train/images/'
+output_dir = f'dataset_blocks_mnist/train/images/'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 imageio.imsave(os.path.join(output_dir, f'image_{(1)}.png'), img)
-labels_output_dir = f'dataset_blocks/train/masks/'
+labels_output_dir = f'dataset_blocks_mnist/train/masks/'
 if not os.path.exists(labels_output_dir):
     os.makedirs(labels_output_dir)
 
@@ -175,38 +180,49 @@ labels_train.append(predicate_labels)
 plt.close()
 #literals, predicate_labels = cp.extract_grounded_predicates(env)
 
-#unique_quadruples = find_unique_quadruples(img)
+#mnist_quadruples = find_mnist_quadruples(img)
 
-#create_images_for_quadruples(img, unique_quadruples)
+#create_images_for_quadruples(img, mnist_quadruples)
+steps = []
+step = 0
 seen_predicates = []
 seen_predicates.append(obs.literals)
-for k in range(1, 8000):
+seen_actions = {}
+seen_actions[obs.literals] = []
 
-    #true_predicates = obs.literals
-    #next_predicates = obs.literals
+for k in range(1, 5500):
 
-    # while(true_predicates == next_predicates):
-    #     action = env.action_space.sample(obs)
-    #     obs, reward, done, info = env.step(action)
-    #     true_predicates = next_predicates.copy()
-    #     next_predicates = obs.literals
-    # img = env.render()
 
     while(obs.literals in seen_predicates):
         action = env.action_space.sample(obs)
         obs, reward, done, info = env.step(action)
+        step += 1
+        #if step >= 10000 and n_of_resets == 0 :
+        #    n_of_resets = 1
+        #    continue
         #true_predicates = next_predicates.copy()
         #next_predicates = obs.literals
+    '''if step >= 10000 and n_of_resets == 0:
+        print("Too many actions. Resetting environment")
+        step = 0
+        env = pddlgym.make("PDDLEnvBlocks-v0", seed=7)
+        #env.seed(0)
+        #env.reset()
+        #env.action_space.seed(n_of_resets)
+        continue'''
     seen_predicates.append(obs.literals)
     img = env.render()
+    steps.append(step)
+    print(f"Step {k}: {step}")
+    step = 0
 
     feature_maps = create_feature_maps(img, ALL_COLORS)
 
-    output_dir = f'dataset_blocks/train/images/'
+    output_dir = f'dataset_blocks_mnist/train/images/'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     imageio.imsave(os.path.join(output_dir, f'image_{(k+1)}.png'), img)
-    labels_output_dir = f'dataset_blocks/train/masks/'
+    labels_output_dir = f'dataset_blocks_mnist/train/masks/'
     if not os.path.exists(labels_output_dir):
         os.makedirs(labels_output_dir)
     np.save(os.path.join(labels_output_dir, f'mask_{k+1}'), feature_maps)
@@ -216,8 +232,10 @@ for k in range(1, 8000):
 
     plt.close('all')
  
-    labels_train_df = pd.DataFrame(labels_train, columns=literals)
-    labels_train_df.to_csv(f'dataset_blocks/train/labels.csv', index=False, sep=';')
+labels_train_df = pd.DataFrame(labels_train, columns=literals)
+labels_train_df.to_csv(f'dataset_blocks_mnist/train/labels.csv', index=False, sep=';')
+with open('steps.txt', 'w') as file:
+    file.write('\n'.join(str(s) for s in steps))
 
 
 
@@ -225,33 +243,21 @@ for k in range(1, 8000):
 
 labels_test = []
 
-for k in range(2000):
-
-    # true_predicates = obs.literals
-    # next_predicates = obs.literals
-
-    # while(true_predicates == next_predicates):
-    #     action = env.action_space.sample(obs)
-    #     obs, reward, done, info = env.step(action)
-    #     true_predicates = next_predicates.copy()
-    #     next_predicates = obs.literals
-    # img = env.render()
+for k in range(1500):
 
     while(obs.literals in seen_predicates):
         action = env.action_space.sample(obs)
         obs, reward, done, info = env.step(action)
-        #true_predicates = next_predicates.copy()
-        #next_predicates = obs.literals
     seen_predicates.append(obs.literals)
     img = env.render()
 
     feature_maps = create_feature_maps(img, ALL_COLORS)
 
-    output_dir = f'dataset_blocks/test/images/'
+    output_dir = f'dataset_blocks_mnist/test/images/'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     imageio.imsave(os.path.join(output_dir, f'image_{(k+1)}.png'), img)
-    labels_output_dir = f'dataset_blocks/test/masks/'
+    labels_output_dir = f'dataset_blocks_mnist/test/masks/'
     if not os.path.exists(labels_output_dir):
         os.makedirs(labels_output_dir)
     np.save(os.path.join(labels_output_dir, f'mask_{k+1}'), feature_maps)
@@ -262,4 +268,4 @@ for k in range(2000):
     plt.close('all')
 
 labels_test_df = pd.DataFrame(labels_test, columns=literals)
-labels_test_df.to_csv('dataset_blocks/test/labels.csv', index=False, sep=';')
+labels_test_df.to_csv('dataset_blocks_mnist/test/labels.csv', index=False, sep=';')
