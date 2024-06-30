@@ -1,1 +1,0 @@
-from .sokoban_cnn import *
