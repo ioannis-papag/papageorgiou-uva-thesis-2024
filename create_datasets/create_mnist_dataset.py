@@ -271,7 +271,7 @@ def main(args):
         print("All unique combinations of layouts have been exhausted. Producing repeated combinations...")
         
     with h5py.File(file_path_img, 'w') as img_hf, h5py.File(file_path_box, 'w') as box_hf:
-        for k in tqdm(range(num_steps+1, num_steps + num_test_set)):
+        for k in tqdm(range(num_test_set)):
             if k > 0:
                 #If it is not the first step, take an action and move to a new state
                 #While the state has been already visited, take a new action
