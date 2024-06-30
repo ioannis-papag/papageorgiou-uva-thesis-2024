@@ -1,1 +1,2 @@
-# papageorgiou-uva-thesis-2024
+# Learning to predict Grounded Logical Predicates from Visual Representations
+
