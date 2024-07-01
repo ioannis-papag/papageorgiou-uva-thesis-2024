@@ -33,3 +33,62 @@ To create a custom Fashion MNIST BlocksWorld dataset, the script create_mnist_da
 - --length: Must be an integer greater than 0 and dictates the length of the training dataset to be generated. The default value is 50000.
 - --unique_test: Either True or False and dictates whether the test dataset will only contain unique layouts of the blocks. The default value is True
 - --test_length: Must be an integer greater than 0 and dictates the length of the test set to be generated. The default value is 10000.
+
+## Training a model
+
+There are 4 types of models that can be trained:
+- An end-to-end model containing all the components
+- The Object Detector (CNN)
+- The Object Encoder and GNN
+- The SORNet Benchmark model
+
+### End-to-End Model training
+To train an end-to-end model, the file *run_pipeline_experiment.py* can be used with the following command line arguments:
+- --runs: Integer dictacting how many consequtive models will be trained. Each of them is initialized with a different seed, ranging from 1 up to the number of runs provided. Default value: 1
+- --dataset: String indicating the type of dataset the model will be trained one. Can take the values: "blocks" or "mnist". Default value: "blocks"
+- --model: String indicating the size of model to be trained. Can take the values: "small", "medium", "large". Default value: "small"
+- --path: String containing the (absolute) path of the directory containing the dataset to be used for training.
+
+### CNN Model training
+To train a CNN Object Detector separately, the file *run_cnn_experiment.py* can be used with the following command line arguments:
+- --runs: Integer dictacting how many consequtive models will be trained. Each of them is initialized with a different seed, ranging from 1 up to the number of runs provided. Default value: 1
+- --dataset: String indicating the type of dataset the model will be trained one. Can take the values: "blocks" or "mnist". Default value: "blocks"
+- --model: String indicating the size of model to be trained. Can take the values: "small", "medium", "large". Default value: "small"
+- --path: String containing the (absolute) path of the directory containing the dataset to be used for training.
+
+### Object Encoder and GNN Model Training
+To train both the Object Encoder (MLP) and GNN separately, the file *run_gnn_experiment.py* can be used with the following command line arguments:
+- --runs: Integer dictacting how many consequtive models will be trained. Each of them is initialized with a different seed, ranging from 1 up to the number of runs provided. Default value: 1
+- --dataset: String indicating the type of dataset the model will be trained one. Can take the values: "blocks" or "mnist". Default value: "blocks"
+- --model: String indicating the size of model to be trained. Can take the values: "small", "medium", "large". Default value: "small"
+- --path: String containing the (absolute) path of the directory containing the dataset to be used for training.
+
+### SORNet Benchmark Model Training
+To train the SORNet model, the file *run_sornet_experiment.py* can be used with the following command line arguments:
+- --runs: Integer dictacting how many consequtive models will be trained. Each of them is initialized with a different seed, ranging from 1 up to the number of runs provided. Default value: 1
+- --dataset: String indicating the type of dataset the model will be trained one. Can take the values: "blocks" or "mnist". Default value: "blocks"
+- --path: String containing the (absolute) path of the directory containing the dataset to be used for training.
+
+## Testing the models
+
+To test the trained models, the file *test_model.py* can be used, for all types of models. The directory containing the models should have one of the following structures depending on the type of model:
+
+### Pipelines:
+* *parent_directory* This directory contains all the trained models
+
+### Individually trained models:
+* *parent_directory*
+  * *parent_directory/cnns* This directory contains all the trained CNNs
+  * *parent_directory/encoders* This directory contains all the trained Object Encoders
+  * *parent_directory/gnns* This directory contains all the trained GNNs
+
+### SORNet:
+* *parent_directory*
+  * *parent_directory/models* This directory contains all the trained autoencoder models
+  * *parent_directory/rnets* This directory contains all the ReadoutNets
+ 
+If these structures are followed, the *test_model.py* can be run using the following command line arguments:
+- --model_type: String indicating the type of model to be tested. Can take the values: "small", "medium", "large", "small_individual", "medium_individual", "large_individual", "sornet"
+- --dataset: String indicating the type of dataset the model will be trained one. Can take the values: "blocks" or "mnist". Default value: "blocks"
+- --model_dir: String indicating the (absolute) path to the model (parent) directory as described above.
+- --path: String containing the (absolute) path of the directory containing the dataset to be used for testing. In the case of the BlocksWorld, there should only be one dataset containing all the samples and this file automatically performa a train-validation-test split. In the case of the Fashion MNIST BlocksWorld, the path should point to a directory containing only the training set, as produced by the files in *create_datasets* folder
