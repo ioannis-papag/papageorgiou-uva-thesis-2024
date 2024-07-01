@@ -6,17 +6,34 @@ The method of AI Planning allows for solving complex problems through representa
 
 ## Setting up the Environment
 
-All of the experiments utilize Python 3.12
+To setup the environemnt, the following steps can be followed:
+
+1. Install Anaconda (or Miniconda)
+2. Clone this repository
+3. Inside this repository and through an Anaconda terminal, run the following command:
+```sh
+conda env create -f environment.yml
+```
+4. Activate the newly created environment:
+```sh
+conda activate ipapageorgiou_env
+```
 
 ### Creating the datasets
 
 Both datasets are provided in the premade_datasets folder, but new datasets can also be created on demand using the create_blocks_dataset.py and create_mnist_dataset.py files. To do so, both the PDDLGym and Tensorflow libraries need to be installed using the following command:
 
 ```sh
-pip install pddlgym tensorflow
+conda install pddlgym tensorflow
 ```
 
-Afterwards, replace the blocks.py file of PDDLGym (found in *path_to_your_pddlgym_installation\pddlgym\rendering\blocks.py*) with the contained in the pddlgym_changes folder. The changes included in this folder ensure the following:
+Subsequently, find where the PDDLGym package is located inside Anaconda using the following command in an Anaconda terminal, after activating the environment:
+
+```sh
+conda list pddlgym
+```
+
+Afterwards, replace the blocks.py file of PDDLGym with the contained in the pddlgym_changes folder. The changes included in this folder ensure the following:
 - The colors of the blocks in the case of the BlocksWorld dataset are known from the beginning and remain constant throughout the generation of the dataset
 - There is an option to create the Fashion MNIST BlocksWorld dataset using keras
 - The clothes of the blocks in the Fashion MNIST case can be deterministically set during each run by passing a generator when calling the *render* function
